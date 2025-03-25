@@ -3,7 +3,7 @@ Onboarding users that would most benefit from copilot and measure value once dep
 
 ## Onboarding
 Identify users and groups for copilot adoption with advanced analytics.
-[Usage report example](imgs/usage_report.jpg)
+![Usage report example](imgs/usage_report.jpg)
 
 Tailor adoption plans per user demographic based on hard usage data.
 
