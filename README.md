@@ -1,5 +1,14 @@
 # Copilot Value Analytics
-Get real feedback from your organisations users about how copilot is helping, with "Copilot Feedback Bot".
+Onboarding users that would most benefit from copilot and measure value once deployed.
+
+## Onboarding
+Identify users and groups for copilot adoption with advanced analytics.
+[Usage report example](imgs/usage_report.jpg)
+
+Tailor adoption plans per user demographic based on hard usage data.
+
+## Measure Copilot Feedback
+For users that use copilot, get real feedback from your organisations users about how copilot is helping, with "Copilot Feedback Bot".
 
 ![Copilot Feedback Bot says 'Hiii!'](imgs/bot-salute-small.png)
 
