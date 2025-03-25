@@ -1,4 +1,4 @@
-# Copilot Feedback Bot
+# Copilot Value Analytics
 Get real feedback from your organisations users about how copilot is helping, with "Copilot Feedback Bot".
 
 ![Copilot Feedback Bot says 'Hiii!'](imgs/bot-salute-small.png)
