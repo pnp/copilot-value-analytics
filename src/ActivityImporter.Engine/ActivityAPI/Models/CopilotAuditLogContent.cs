@@ -48,4 +48,6 @@ public class AccessedResource
     public string? Name { get; set; } = null;
     public string? SensitivityLabelId { get; set; } = null;
     public string? Type { get; set; } = null;
+
+    public string? Action { get; set; }
 }
