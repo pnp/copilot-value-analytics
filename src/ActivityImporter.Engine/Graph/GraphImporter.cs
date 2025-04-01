@@ -4,12 +4,10 @@ using ActivityImporter.Engine.Graph.O365UsageReports.Models;
 using ActivityImporter.Engine.Graph.O365UsageReports.ReportLoaders;
 using Common.DataUtils;
 using Common.Engine.Config;
-using Entities.DB;
 using Entities.DB.DbContexts;
 using Entities.DB.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Graph;
 
 namespace ActivityImporter.Engine.Graph;
 
@@ -18,10 +16,7 @@ namespace ActivityImporter.Engine.Graph;
 /// </summary>
 public class GraphImporter : AbstractApiLoader
 {
-    #region Constructors & Props
-
     private readonly GraphAppIndentityOAuthContext _graphAppIndentityOAuthContext;
-    private GraphServiceClient? _graphClient = null;
     private readonly AppConfig _appConfig;
 
     public GraphImporter(AppConfig appConfig, ILogger telemetry) : base(telemetry)
@@ -30,12 +25,9 @@ public class GraphImporter : AbstractApiLoader
         _appConfig = appConfig;
     }
 
-    #endregion
-
     async Task InitAuth()
     {
         await _graphAppIndentityOAuthContext.InitClientCredential();
-        _graphClient = new GraphServiceClient(_graphAppIndentityOAuthContext.Creds);
     }
 
     /// <summary>
@@ -134,15 +126,6 @@ public class GraphImporter : AbstractApiLoader
         _telemetry.LogInformation($"Activity reports imported.");
     }
 
-    DataContext GetDB()
-    {
-
-        var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
-        optionsBuilder.UseSqlServer(_appConfig.ConnectionStrings.SQL);
-
-        return new DataContext(optionsBuilder.Options);
-
-    }
 
     async Task<int> LoadAndSaveReportAsync<TReportDbType, TUserActivityUserDetail>(AbstractActivityLoader<TReportDbType, TUserActivityUserDetail> abstractActivityLoader,
         string thingWeAreImporting)
@@ -157,5 +140,12 @@ public class GraphImporter : AbstractApiLoader
         _telemetry.LogInformation($"Imported {total.ToString("N0")} {thingWeAreImporting} reports.");
 
         return total;
+    }
+    DataContext GetDB()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
+        optionsBuilder.UseSqlServer(_appConfig.ConnectionStrings.SQL);
+
+        return new DataContext(optionsBuilder.Options);
     }
 }
