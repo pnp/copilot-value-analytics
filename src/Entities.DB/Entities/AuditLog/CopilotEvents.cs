@@ -13,6 +13,12 @@ public class CopilotChat : BaseOfficeEvent
 {
     [Column("app_host")]
     public string AppHost { get; set; } = null!;
+
+
+    [ForeignKey(nameof(Agent))]
+    [Column("agent_id")]
+    public int? AgentId { get; set; }
+    public CopilotAgentType Agent { get; set; } = null!;
 }
 
 /// <summary>

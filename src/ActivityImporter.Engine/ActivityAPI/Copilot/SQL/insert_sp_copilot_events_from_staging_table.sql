@@ -29,15 +29,13 @@ INSERT INTO event_file_names([name])
 	left join event_file_names on event_file_names.[name] = imports.file_name
 	where event_file_names.[name] is null and imports.file_name is not null and imports.file_name != '';
 
-insert into [event_copilot_chats] (event_id, app_host)
-	SELECT imports.event_id,app_host FROM [${STAGING_TABLE_ACTIVITY}] imports
 
 insert into [event_copilot_files] (copilot_chat_id, file_name_id, file_extension_id, url_id, site_id)
 	SELECT imports.event_id
-		  ,event_file_names.id as fileNameId
-		  ,event_file_ext.id as fileExtId
-		  ,urls.id as urlId
-		  ,sites.id as siteId
+		,event_file_names.id as fileNameId
+		,event_file_ext.id as fileExtId
+		,urls.id as urlId
+		,sites.id as siteId
 	  FROM [${STAGING_TABLE_ACTIVITY}] imports
 	  inner join event_file_names on event_file_names.[name] = imports.file_name
 	  inner join event_file_ext on event_file_ext.[name] = imports.file_extension

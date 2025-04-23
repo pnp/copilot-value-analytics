@@ -21,3 +21,10 @@ public class CopilotActivityType : AbstractEFEntityWithName
     public const string Chat = "Chat";
     public const string Other = "Other";
 }
+
+[Table("copilot_agents")]
+public class CopilotAgentType : AbstractEFEntityWithName
+{
+    [Column("agent_id")]
+    public string AgentID { get; set; } = null!;
+}

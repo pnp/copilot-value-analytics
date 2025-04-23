@@ -46,6 +46,7 @@ public class DataContext : CommonContext
 
     public DbSet<UserSurveyResponseActivityType> SurveyResponseActivityTypes { get; set; }
     public DbSet<CopilotActivity> CopilotActivities { get; set; }
+    public DbSet<CopilotAgentType> CopilotAgentTypes { get; set; }
     public DbSet<CopilotActivityType> CopilotActivityTypes { get; set; }
 
 
@@ -123,6 +124,10 @@ public class DataContext : CommonContext
 
         modelBuilder.Entity<ImportSiteFilter>()
          .HasIndex(t => t.UrlBase)
+         .IsUnique();
+
+        modelBuilder.Entity<CopilotAgentType>()
+         .HasIndex(t => t.AgentID)
          .IsUnique();
 
 

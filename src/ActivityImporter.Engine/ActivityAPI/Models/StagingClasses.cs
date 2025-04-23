@@ -10,6 +10,12 @@ public abstract class BaseCopilotLogTempEntity
 
     [Column("event_id")]
     public Guid EventId { get; set; }
+
+    [Column("agent_name", true)]
+    public string? AgentName { get; set; }
+
+    [Column("agent_id", true)]
+    public string? AgentId { get; set; }
 }
 
 [TempTableName(ActivityImportConstants.STAGING_TABLE_COPILOT_CHATONLY)]

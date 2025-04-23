@@ -7,9 +7,12 @@ public class CopilotAuditLogContent : AbstractAuditLogContent
     public CopilotEventData CopilotEventData { get; set; } = null!;
     public override async Task<bool> ProcessExtendedProperties(ActivityLogSaveSession sessionContext, CommonAuditEvent relatedAuditEvent)
     {
-        await sessionContext.CopilotEventResolver.SaveSingleCopilotEventToSql(CopilotEventData, relatedAuditEvent);
+        await sessionContext.CopilotEventResolver.SaveSingleCopilotEventToSqlStaging(this, relatedAuditEvent);
         return true;
     }
+
+    public string? AgentName { get; set; }
+    public string? AgentId { get; set; }
 }
 
 /// <summary>
