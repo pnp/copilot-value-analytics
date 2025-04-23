@@ -402,6 +402,7 @@ BEGIN
     "Copilot App VivaGoals" BIGINT NOT NULL DEFAULT 0,
     "Copilot App Whiteboard" BIGINT NOT NULL DEFAULT 0,
     "Copilot App Word" BIGINT NOT NULL DEFAULT 0,
+    "Copilot Uploaded Files" INT NOT NULL DEFAULT 0,
 
     CONSTRAINT PK_ActivitiesWeeklyColumns
     PRIMARY KEY CLUSTERED ("user_id" ASC, "date" ASC)
@@ -511,6 +512,21 @@ BEGIN
     "Copilot App VivaGoals" BIGINT NOT NULL DEFAULT 0,
     "Copilot App Whiteboard" BIGINT NOT NULL DEFAULT 0,
     "Copilot App Word" BIGINT NOT NULL DEFAULT 0;
+END
+GO
+
+-- Add new Copilot columns
+IF NOT EXISTS (
+  SELECT 1
+  FROM sys.columns
+  WHERE object_id = OBJECT_ID('profiling.ActivitiesWeeklyColumns')
+    AND name = 'Copilot Uploaded Files'
+)
+BEGIN
+  ALTER TABLE
+    profiling.ActivitiesWeeklyColumns
+  ADD
+    "Copilot Uploaded Files" INT NOT NULL DEFAULT 0;
 END
 GO
 
@@ -698,6 +714,7 @@ BEGIN
     "Yammer Used Android" BIT NOT NULL DEFAULT 0,
     "Yammer Used iPad" BIT NOT NULL DEFAULT 0,
     "Yammer Used iPhone" BIT NOT NULL DEFAULT 0,
+
     CONSTRAINT [PK_profiling.UsageWeekly]
     PRIMARY KEY CLUSTERED ("user_id", "date" ASC)
     WITH (
@@ -1048,7 +1065,8 @@ BEGIN
     copilot_vivaengage BIGINT NOT NULL DEFAULT 0,
     copilot_vivagoals BIGINT NOT NULL DEFAULT 0,
     copilot_whiteboard BIGINT NOT NULL DEFAULT 0,
-    copilot_word BIGINT NOT NULL DEFAULT 0
+    copilot_word BIGINT NOT NULL DEFAULT 0,
+    copilot_uploaded_files INT NOT NULL DEFAULT 0
     );
 END
 GO
@@ -1988,6 +2006,28 @@ BEGIN
         COUNT(has_meeting) AS meeting_count
       FROM events
       GROUP BY "user_id", "date"
+    ),
+    uploaded_files AS (
+      SELECT
+        ae.user_id,
+        @StartDate AS "date",
+        u.full_url AS file_url
+      FROM dbo.event_meta_sharepoint AS ems
+        INNER JOIN dbo.audit_events AS ae ON ae.id = ems.event_id
+        INNER JOIN dbo.event_operations AS eo ON ae.operation_id = eo.id
+        INNER JOIN dbo.urls AS u ON u.id = ems.url_id
+      WHERE
+        eo.name = 'FileUploaded'
+        AND @StartDate <= ae.time_stamp AND ae.time_stamp <= @EndDate
+        AND u.full_url LIKE '%/Microsoft Copilot Chat Files/%'
+    ),
+    uploaded_files_counts AS (
+      SELECT
+        "user_id",
+        "date",
+        COUNT(file_url) AS upload_file_count
+      FROM uploaded_files
+      GROUP BY "user_id", "date"
     )
   INSERT INTO @copilot
   (
@@ -2016,7 +2056,8 @@ BEGIN
     copilot_vivaengage,
     copilot_vivagoals,
     copilot_whiteboard,
-    copilot_word
+    copilot_word,
+    copilot_uploaded_files
   )
   SELECT
     a."user_id",
@@ -2044,7 +2085,8 @@ BEGIN
     SUM(copilot_vivaengage),
     SUM(copilot_vivagoals),
     SUM(copilot_whiteboard),
-    SUM(copilot_word)
+    SUM(copilot_word),
+    (SELECT upload_file_count FROM uploaded_files_counts ufc WHERE ufc."user_id" = a."user_id")
   FROM host_activities AS a
     JOIN event_counts AS c ON a."user_id" = c."user_id"
   GROUP BY a."user_id";
@@ -2075,7 +2117,8 @@ BEGIN
     "Copilot App VivaEngage" = tvp.copilot_vivaengage,
     "Copilot App VivaGoals" = tvp.copilot_vivagoals,
     "Copilot App Whiteboard" = tvp.copilot_whiteboard,
-    "Copilot App Word" = tvp.copilot_word
+    "Copilot App Word" = tvp.copilot_word,
+    "Copilot Uploaded Files" = tvp.copilot_uploaded_files
   FROM #ActivitiesStaging AS t
     INNER JOIN @copilot AS tvp
       ON t."user_id" = tvp."user_id" AND t."date" = tvp."date";
@@ -2108,7 +2151,8 @@ BEGIN
     "Copilot App VivaEngage",
     "Copilot App VivaGoals",
     "Copilot App Whiteboard",
-    "Copilot App Word"
+    "Copilot App Word",
+    "Copilot Uploaded Files"
   )
   SELECT
     "user_id",
@@ -2136,7 +2180,8 @@ BEGIN
     copilot_vivaengage,
     copilot_vivagoals,
     copilot_whiteboard,
-    copilot_word
+    copilot_word,
+    copilot_uploaded_files
   FROM @copilot AS tvp
   WHERE NOT EXISTS (
     SELECT 1
@@ -2234,7 +2279,8 @@ BEGIN
         "Copilot App VivaEngage",
         "Copilot App VivaGoals",
         "Copilot App Whiteboard",
-        "Copilot App Word"
+        "Copilot App Word",
+        "Copilot Uploaded Files"
       )
     ) AS Unpivoted
     GROUP BY "user_id", Metric;
@@ -2329,7 +2375,8 @@ BEGIN
       "Copilot App VivaEngage",
       "Copilot App VivaGoals",
       "Copilot App Whiteboard",
-      "Copilot App Word"
+      "Copilot App Word",
+      "Copilot Uploaded Files"
     )
     SELECT
       "user_id",
@@ -2391,7 +2438,8 @@ BEGIN
       "Copilot App VivaEngage",
       "Copilot App VivaGoals",
       "Copilot App Whiteboard",
-      "Copilot App Word"
+      "Copilot App Word",
+      "Copilot Uploaded Files"
     FROM #ActivitiesStaging;
   END TRY
   BEGIN CATCH
@@ -2720,7 +2768,8 @@ BEGIN
         "Copilot App VivaEngage" BIGINT DEFAULT 0,
         "Copilot App VivaGoals" BIGINT DEFAULT 0,
         "Copilot App Whiteboard" BIGINT DEFAULT 0,
-        "Copilot App Word" BIGINT DEFAULT 0
+        "Copilot App Word" BIGINT DEFAULT 0,
+        "Copilot Uploaded Files" INT DEFAULT 0
       );
 
       -- Insert only the activities between the dates
