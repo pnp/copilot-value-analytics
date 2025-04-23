@@ -2,7 +2,6 @@
 using Common.Engine.Config;
 using Common.Engine.Notifications;
 using Common.Engine.Surveys;
-using Entities.DB;
 using Entities.DB.DbContexts;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Connector.Authentication;

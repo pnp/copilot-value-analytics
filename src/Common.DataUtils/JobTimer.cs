@@ -20,7 +20,7 @@ namespace Common.DataUtils
         }
         public void Start()
         {
-            _tracer.LogDebug($"Starting {_operationName}");   
+            _tracer.LogDebug($"Starting {_operationName}");
             _sw.Start();
         }
 

@@ -1,12 +1,11 @@
-﻿using Common.DataUtils;
-using Entities.DB.LookupCaches.Discrete;
-using Entities.DB;
-using Entities.DB.Entities;
-using ActivityImporter.Engine.Graph.O365UsageReports.Models;
+﻿using ActivityImporter.Engine.Graph.O365UsageReports.Models;
 using ActivityImporter.Engine.Graph.O365UsageReports.ReportLoaders;
+using Common.DataUtils;
+using Entities.DB.DbContexts;
+using Entities.DB.Entities;
+using Entities.DB.LookupCaches.Discrete;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Entities.DB.DbContexts;
 
 namespace ActivityImporter.Engine.Graph.O365UsageReports;
 
@@ -33,9 +32,9 @@ public class SqlUsageReportPersistence : IUsageReportPersistence
         where TAbstractActivityRecord : AbstractActivityRecord
     {
         var table = GetReportDbTypes(loader);
-        var oldest = await table.OrderByDescending(r=> r.DateOfActivity).Take(1).ToListAsync();
+        var oldest = await table.OrderByDescending(r => r.DateOfActivity).Take(1).ToListAsync();
         if (oldest.Count() == 0) return null;
-        
+
         return oldest.First().DateOfActivity;
     }
 

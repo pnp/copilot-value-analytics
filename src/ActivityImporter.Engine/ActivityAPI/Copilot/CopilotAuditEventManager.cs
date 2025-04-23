@@ -1,9 +1,7 @@
 ﻿using ActivityImporter.Engine.ActivityAPI.Models;
 using Common.DataUtils;
 using Common.DataUtils.Sql.Inserts;
-using Entities.DB.DbContexts;
 using Entities.DB.Entities.AuditLog;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace ActivityImporter.Engine.ActivityAPI.Copilot;

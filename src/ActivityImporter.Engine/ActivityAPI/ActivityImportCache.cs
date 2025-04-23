@@ -1,5 +1,4 @@
 ﻿using ActivityImporter.Engine.ActivityAPI.Models;
-using Entities.DB;
 using Entities.DB.DbContexts;
 using Entities.DB.Entities.AuditLog;
 using Entities.DB.Entities.SP;

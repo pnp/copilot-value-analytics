@@ -1,8 +1,8 @@
-﻿using Entities.DB.Entities.AuditLog;
+﻿using Entities.DB.DbContexts;
 using Entities.DB.Entities;
-using Microsoft.Extensions.Logging;
+using Entities.DB.Entities.AuditLog;
 using Microsoft.EntityFrameworkCore;
-using Entities.DB.DbContexts;
+using Microsoft.Extensions.Logging;
 
 namespace Entities.DB;
 
@@ -64,7 +64,7 @@ public class FakeDataGen
             FileName = new SPEventFileName { Name = fileName },
             FileExtension = await context.SharePointFileExtensions.SingleOrDefaultAsync(e => e.Name == "docx") ?? new SPEventFileExtension { Name = "docx" },
             Url = new Entities.SP.Url { FullUrl = $"https://devbox.sharepoint.com/Docs/{fileName}" },
-            Site = context.Sites.FirstOrDefault() ?? new Entities.SP.Site { UrlBase="https://copilot.sharepoint.com" },
+            Site = context.Sites.FirstOrDefault() ?? new Entities.SP.Site { UrlBase = "https://copilot.sharepoint.com" },
         });
     }
 
@@ -148,7 +148,7 @@ public class FakeDataGen
             User = user,
             DateOfActivity = DateTime.Now,
             Excel = true,
-            ExcelMobile= true,
+            ExcelMobile = true,
             ExcelWindows = true,
             ExcelMac = true,
             ExcelWeb = true,
@@ -183,7 +183,8 @@ public class FakeDataGen
             OutlookMobile = true,
         });
 
-        context.SharePointUserActivityLogs.Add(new Entities.UsageReports.SharePointUserActivityLog {
+        context.SharePointUserActivityLogs.Add(new Entities.UsageReports.SharePointUserActivityLog
+        {
             DateOfActivity = DateTime.Now,
             User = user,
 
@@ -236,7 +237,7 @@ public class FakeDataGen
             MeetingsOrganizedCount = rnd.Next(0, 1),
             PrivateChatMessageCount = rnd.Next(0, 1),
             TeamChatMessageCount = rnd.Next(0, 1),
-            PostMessages = rnd.Next(0, 1),   
+            PostMessages = rnd.Next(0, 1),
             ReplyMessages = rnd.Next(0, 1),
             ScheduledOneTimeMeetingsAttendedCount = rnd.Next(0, 1),
             ScheduledOneTimeMeetingsOrganizedCount = rnd.Next(0, 1),

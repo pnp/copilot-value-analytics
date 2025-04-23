@@ -106,4 +106,3 @@ public abstract class AbstractActivityLoader<TReportDbType, TAbstractActivityRec
 
     protected int GetOptionalInt(int? i) => i ?? 0;
 }
-    

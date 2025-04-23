@@ -1,9 +1,4 @@
 ﻿using ActivityImporter.Engine.Graph.O365UsageReports.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ActivityImporter.Engine.Graph.O365UsageReports;
 

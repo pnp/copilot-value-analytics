@@ -1,8 +1,6 @@
 ﻿using ActivityImporter.Engine.Graph.O365UsageReports.Models;
-using Entities.DB;
 using Entities.DB.DbContexts;
 using Entities.DB.Entities.UsageReports;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace ActivityImporter.Engine.Graph.O365UsageReports.ReportLoaders;

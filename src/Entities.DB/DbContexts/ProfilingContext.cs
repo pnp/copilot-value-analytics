@@ -1,5 +1,5 @@
-﻿using Entities.DB.Entities.Profiling;
-using Entities.DB.Entities;
+﻿using Entities.DB.Entities;
+using Entities.DB.Entities.Profiling;
 using Microsoft.EntityFrameworkCore;
 
 namespace Entities.DB.DbContexts;

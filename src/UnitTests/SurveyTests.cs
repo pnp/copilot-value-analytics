@@ -61,7 +61,7 @@ public class SurveyTests : AbstractTest
                     Question = new BooleanSurveyQuestion
                     {
                         QuestionText = "Is this also true?",
-                        OptimalAnswer = true,           
+                        OptimalAnswer = true,
                         OptimalAnswerLogicalOp = LogicalOperator.Equals,
                     },
                     ValueGiven = false          // Wrong answer
@@ -71,8 +71,8 @@ public class SurveyTests : AbstractTest
         );
 
         Assert.AreEqual(75, surveyReport.PercentageOfAnswersWithPositiveResult);
-        Assert.AreEqual("What is love?",        surveyReport.Stats.HighestPositiveAnswerQuestion.Entity);
-        Assert.AreEqual("Is this also true?",   surveyReport.Stats.HighestNegativeAnswerQuestion.Entity);
+        Assert.AreEqual("What is love?", surveyReport.Stats.HighestPositiveAnswerQuestion.Entity);
+        Assert.AreEqual("Is this also true?", surveyReport.Stats.HighestNegativeAnswerQuestion.Entity);
 
         Assert.IsTrue(surveyReport.Stats.HighestPositiveAnswerQuestion.Score == 1);
         Assert.IsTrue(surveyReport.Stats.HighestNegativeAnswerQuestion.Score == 1);

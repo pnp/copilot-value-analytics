@@ -1,5 +1,4 @@
-﻿using Common.Engine.Models;
-using Entities.DB.Entities;
+﻿using Entities.DB.Entities;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Serialization;
 

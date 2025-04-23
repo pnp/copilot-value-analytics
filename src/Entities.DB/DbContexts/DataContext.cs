@@ -1,7 +1,7 @@
-﻿using Entities.DB.Entities.AuditLog;
+﻿using Entities.DB.Entities;
+using Entities.DB.Entities.AuditLog;
 using Entities.DB.Entities.SP;
 using Entities.DB.Entities.UsageReports;
-using Entities.DB.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Entities.DB.DbContexts;

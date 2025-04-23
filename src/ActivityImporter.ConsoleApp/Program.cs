@@ -31,7 +31,7 @@ catch (ConfigurationMissingException ex)
 }
 
 
-var _logger = LoggerFactory.Create(config =>
+var logger = LoggerFactory.Create(config =>
 {
     config.AddConsole();
 }).CreateLogger("Import console");
@@ -44,15 +44,15 @@ optionsBuilder.UseSqlServer(config.ConnectionStrings.SQL);
 
 using (var db = new DataContext(optionsBuilder.Options))
 {
-    await DbInitialiser.EnsureInitialised(db, _logger, config.TestUPN);
+    await DbInitialiser.EnsureInitialised(db, logger, config.TestUPN);
 
     if (config.DevMode)
     {
-        await FakeDataGen.GenerateFakeActivityForAllUsers(db, _logger);
+        await FakeDataGen.GenerateFakeActivityForAllUsers(db, logger);
     }
 
     // Import things
-    var t = new ProgramTasks(config, _logger);
+    var t = new ProgramTasks(config, logger);
     await t.DownloadAndSaveActivityData();
 
     await t.GetGraphTeamsAndUserData();

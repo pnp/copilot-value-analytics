@@ -1,6 +1,4 @@
-﻿using Entities.DB.Entities;
-
-namespace Entities.DB.Models;
+﻿namespace Entities.DB.Models;
 public interface IActivitiesWeeklyRecord
 {
     string Metric { get; }

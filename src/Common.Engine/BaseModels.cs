@@ -1,7 +1,7 @@
 ﻿using Entities.DB.Entities;
 using System.Text.Json.Serialization;
 
-namespace Common.Engine.Models;
+namespace Common.Engine;
 
 
 public class EntityWithScore<T>

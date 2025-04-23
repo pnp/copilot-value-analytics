@@ -9,7 +9,7 @@ namespace UnitTests.FakeLoaderClasses;
 public class FakeUserActivityLoader : IUserActivityLoader
 {
     public int ResultsPerPage { get; set; } = 1;
-    public Task<List<TAbstractActivityRecord>> LoadReport<TAbstractActivityRecord>(DateTime dt, string reportGraphURL) 
+    public Task<List<TAbstractActivityRecord>> LoadReport<TAbstractActivityRecord>(DateTime dt, string reportGraphURL)
         where TAbstractActivityRecord : AbstractActivityRecord
     {
         var datoir = new List<TeamsDeviceUsageUserDetail>();
@@ -37,7 +37,7 @@ public class FakeUsageReportPersistence : IUsageReportPersistence
         throw new NotImplementedException();
     }
 
-    public Task SaveLoadedReports<TReportDbType, TAbstractActivityRecord>(Dictionary<DateTime, List<TAbstractActivityRecord>> reportPages, 
+    public Task SaveLoadedReports<TReportDbType, TAbstractActivityRecord>(Dictionary<DateTime, List<TAbstractActivityRecord>> reportPages,
         AbstractActivityLoader<TReportDbType, TAbstractActivityRecord> loader)
         where TReportDbType : AbstractUsageActivityLog, new()
         where TAbstractActivityRecord : AbstractActivityRecord
