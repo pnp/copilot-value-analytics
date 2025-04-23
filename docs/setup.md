@@ -86,8 +86,10 @@ To deploy the bot for production, we use docker to build a new bot image with th
     * Optional for Teams SSO: 
       * Login page URL (VITE_TEAMSFX_START_LOGIN_PAGE_URL). This will based on the Azure Front Door created. Example: https://contoso.azurefd.net/auth-start.html
       * Created JS app scope ID (VITE_MSAL_SCOPES), based on domain-name of app-service if Teams SSO is required, otherwise any ID. Example: api://contoso.azurefd.net/e068a350-0000-0000-bfc0-cda3610dde72/access
+
+Start build:
 * Build images with ``docker-compose build`` from the ``src`` folder (change directory to ".\src" to run command).
-* You will end up with two images:
+* You will end up with three images:
    1. ``copilotbot-functions`` - Azure functions app image.
    2. ``copilotbot-web`` - this contains the ASP.Net + built JavaScript with your app registration details compiled in via the docker-compose.override.yml changes you made earlier.
    3. ``copilotbot-importer`` - an importer task that looks for usage activity. 
