@@ -18,7 +18,7 @@ public class CopilotChat : BaseOfficeEvent
     [ForeignKey(nameof(Agent))]
     [Column("agent_id")]
     public int? AgentId { get; set; }
-    public CopilotAgentType Agent { get; set; } = null!;
+    public CopilotAgentType? Agent { get; set; } = null!;
 }
 
 /// <summary>

@@ -30,11 +30,13 @@ public class FakeDataGen
             logger.LogWarning($"Creating new user with UPN {forUpn}");
             user = new User { UserPrincipalName = forUpn };
         }
+
+        // Add a meeting event with cop
         context.Add(new CopilotEventMetadataMeeting
         {
             RelatedChat = new CopilotChat
             {
-                AppHost = "DevBox",
+                AppHost = "Teams",
                 AuditEvent = new CommonAuditEvent
                 {
                     User = user,
@@ -43,7 +45,7 @@ public class FakeDataGen
                     Operation = new EventOperation { Name = "Meeting operation " + DateTime.Now.Ticks }
                 }
             },
-            OnlineMeeting = new OnlineMeeting { Name = "Weekly Team Sync", MeetingId = "Join Link" }
+            OnlineMeeting = new OnlineMeeting { Name = "Weekly Team Sync - " + Enum.GetName(DateTime.Now.DayOfWeek), MeetingId = "Join Link" }
         });
 
         var fileName = $"Test File {DateTime.Now.Ticks}.docx";
@@ -52,7 +54,7 @@ public class FakeDataGen
 
             RelatedChat = new CopilotChat
             {
-                AppHost = "DevBox",
+                AppHost = "Office",
                 AuditEvent = new CommonAuditEvent
                 {
                     User = user,
@@ -65,6 +67,23 @@ public class FakeDataGen
             FileExtension = await context.SharePointFileExtensions.SingleOrDefaultAsync(e => e.Name == "docx") ?? new SPEventFileExtension { Name = "docx" },
             Url = new Entities.SP.Url { FullUrl = $"https://devbox.sharepoint.com/Docs/{fileName}" },
             Site = context.Sites.FirstOrDefault() ?? new Entities.SP.Site { UrlBase = "https://copilot.sharepoint.com" },
+        });
+
+        // Add an agent chat event
+        var randomAgent = await context.CopilotAgentTypes
+            .OrderBy(e => Guid.NewGuid())
+            .FirstOrDefaultAsync();
+        context.Add(new CopilotChat
+        {
+            AppHost = "Teams",
+            AuditEvent = new CommonAuditEvent
+            {
+                User = user,
+                Id = Guid.NewGuid(),
+                TimeStamp = DateTime.Now.AddDays(-3),
+                Operation = new EventOperation { Name = "Agent operation " + DateTime.Now.Ticks }
+            },
+            Agent = randomAgent
         });
     }
 
