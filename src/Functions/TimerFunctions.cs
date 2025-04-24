@@ -1,37 +1,43 @@
+using Common.Engine.Config;
 using Common.Engine.Surveys;
+using Entities.DB;
+using Entities.DB.DbContexts;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
 namespace Functions;
 
-public class TimerFunctions
+public class TimerFunctions(ILogger<TimerFunctions> tracer, ILogger<SurveyManager> loggerSM, ISurveyManagerDataLoader surveyManagerDataLoader, 
+    ISurveyEventsProcessor surveyProcessor, TeamsAppConfig config, DataContext dataContext)
 {
-    private readonly ILogger<TimerFunctions> _tracer;
-    private readonly ILogger<SurveyManager> _loggerSM;
-    private readonly ISurveyManagerDataLoader _surveyManagerDataLoader;
-    private readonly ISurveyEventsProcessor _surveyProcessor;
-
-    const string CRON_TIME = "0 0 * * * *";       // Every hour for debugging
-
-
-    public TimerFunctions(ILogger<TimerFunctions> tracer, ILogger<SurveyManager> loggerSM, ISurveyManagerDataLoader surveyManagerDataLoader, ISurveyEventsProcessor surveyProcessor)
-    {
-        _tracer = tracer;
-        _loggerSM = loggerSM;
-        _surveyManagerDataLoader = surveyManagerDataLoader;
-        _surveyProcessor = surveyProcessor;
-    }
+    const string CRON_TIME_HOURLY = "0 0 * * * *";       // Every hour for debugging
+    const string CRON_TIME_DAILY = "0 0 0 * * *";       // Every day at midnight
 
     /// <summary>
     /// Trigger notifications. Find people that've done copilot things, and prompt for survey
     /// </summary>
     [Function(nameof(TriggerNotifications))]
-    public async Task TriggerNotifications([TimerTrigger(CRON_TIME)] TimerJobRefreshInfo timerInfo)
+    public async Task TriggerNotifications([TimerTrigger(CRON_TIME_HOURLY)] TimerJobRefreshInfo timerInfo)
     {
-        _tracer.LogInformation($"{nameof(TriggerNotifications)} function executed at: {DateTime.Now}");
-        var sm = new SurveyManager(_surveyManagerDataLoader, _surveyProcessor, _loggerSM);
+        tracer.LogInformation($"{nameof(TriggerNotifications)} function executed at: {DateTime.Now}");
+        var sm = new SurveyManager(surveyManagerDataLoader, surveyProcessor, loggerSM);
         await sm.FindAndProcessNewSurveyEventsAllUsers();
-        _tracer.LogInformation($"Next timer schedule at: {timerInfo.ScheduleStatus?.Next}");
+        tracer.LogInformation($"Next timer schedule at: {timerInfo.ScheduleStatus?.Next}");
+    }
+
+    [Function(nameof(GenerateFakeActivityForAllUsers))]
+    public async Task GenerateFakeActivityForAllUsers([TimerTrigger(CRON_TIME_DAILY)] TimerJobRefreshInfo timerInfo)
+    {
+        if (config.DevMode)
+        {
+            tracer.LogInformation($"{nameof(GenerateFakeActivityForAllUsers)} function executed at: {DateTime.Now}");
+            await FakeDataGen.GenerateFakeActivityForAllUsers(dataContext, loggerSM);
+            tracer.LogInformation($"Next timer schedule at: {timerInfo.ScheduleStatus?.Next}");
+        }
+        else
+        {
+            tracer.LogWarning($"{nameof(GenerateFakeActivityForAllUsers)} function executed in non-dev mode, skipping.");
+        }
     }
 }
 
