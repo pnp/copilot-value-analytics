@@ -62,7 +62,7 @@ var host = new HostBuilder()
                 config.AddConsole();
             }).CreateLogger("Functions app");
             logger.LogTrace($"Ensuring DB is created and seeded using '{config.ConnectionStrings.SQL}'");
-            DbInitialiser.EnsureInitialised(db, logger, config.TestUPN).Wait();
+            DbInitialiser.EnsureInitialised(db, logger, config.TestUPN, config.DevMode).Wait();
 
             logger.LogTrace("Running host");
         }

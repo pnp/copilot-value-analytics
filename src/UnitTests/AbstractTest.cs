@@ -37,7 +37,7 @@ public abstract class AbstractTest
     [TestInitialize]
     public async Task TestInitialize()
     {
-        await DbInitialiser.EnsureInitialised(_db, _logger, _config.TestUPN);
+        await DbInitialiser.EnsureInitialised(_db, _logger, _config.TestUPN, true);
     }
 
     protected ILogger<T> GetLogger<T>()

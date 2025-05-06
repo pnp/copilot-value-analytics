@@ -67,7 +67,7 @@ try
 
     using (var db = new DataContext(optionsBuilder.Options))
     {
-        await DbInitialiser.EnsureInitialised(db, logger, config.TestUPN);
+        await DbInitialiser.EnsureInitialised(db, logger, config.TestUPN, config.DevMode);
 
         if (config.DevMode)
         {

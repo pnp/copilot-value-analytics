@@ -16,7 +16,7 @@ public class DbInitialiser
     /// <summary>
     /// Ensure created and with base data
     /// </summary>
-    public static async Task EnsureInitialised(DataContext context, ILogger logger, string? defaultUserUPN)
+    public static async Task EnsureInitialised(DataContext context, ILogger logger, string? defaultUserUPN, bool insertDebug)
     {
         var createdNewDb = await context.Database.EnsureCreatedAsync();
 
@@ -62,12 +62,19 @@ public class DbInitialiser
 
                 // Add some base survey pages
                 AddTestSurveyPages(context);
-#if DEBUG
-                await DirtyTestDataHackInserts(context, logger, editDoc, getHighlights);
-                await context.SaveChangesAsync();
+                if (insertDebug)
+                {
+                    logger.LogInformation("Adding debugging test data");
+                    await DirtyTestDataHackInserts(context, logger, editDoc, getHighlights);
+                    await context.SaveChangesAsync();
 
-                await FakeDataGen.GenerateFakeCopilotFor(defaultUserUPN, context, logger);
-#endif
+                    await FakeDataGen.GenerateFakeCopilotFor(defaultUserUPN, context, logger);
+                }
+                else
+                {
+                    logger.LogInformation("Skipping debugging test data");
+                }
+
                 await context.SaveChangesAsync();
 
                 // Install profiling extensions

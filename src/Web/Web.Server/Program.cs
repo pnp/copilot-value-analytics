@@ -113,7 +113,7 @@ public class Program
                 }
             }).CreateLogger("DB init");
             logger.LogInformation($"Using SQL connection-string: {config.ConnectionStrings.SQL}");
-            await DbInitialiser.EnsureInitialised(db, logger, config.TestUPN);
+            await DbInitialiser.EnsureInitialised(db, logger, config.TestUPN, config.DevMode);
 
         }
 

@@ -363,7 +363,7 @@ public class CopilotTests : AbstractTest
             .Include(x => x.Agent)
             .FirstOrDefaultAsync(x => x.AuditEvent == commonEventChat1);
         Assert.IsNotNull(commonEventDocEditReloaded);
-        Assert.IsTrue(commonEventDocEditReloaded.Agent.AgentID == agentId);
+        Assert.IsTrue(commonEventDocEditReloaded!.Agent!.AgentID == agentId);
         Assert.IsTrue(commonEventDocEditReloaded.Agent.Name == agentName);
 
         // Save another event with new agent name but same agent ID
@@ -376,9 +376,9 @@ public class CopilotTests : AbstractTest
         var commonEventDocEditReloaded2 = await _db.CopilotChats
             .Include(x => x.Agent)
             .FirstOrDefaultAsync(x => x.AuditEvent == commonEventChat2);
-        await _db.Entry(commonEventDocEditReloaded2!.Agent).ReloadAsync();
+        await _db.Entry(commonEventDocEditReloaded2!.Agent!).ReloadAsync();
         Assert.IsNotNull(commonEventDocEditReloaded2);
-        Assert.IsTrue(commonEventDocEditReloaded2.Agent.AgentID == agentId);
+        Assert.IsTrue(commonEventDocEditReloaded2!.Agent!.AgentID == agentId);
         Assert.IsTrue(commonEventDocEditReloaded2.Agent.Name == newAgentName);
     }
 

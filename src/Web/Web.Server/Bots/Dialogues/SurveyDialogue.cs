@@ -83,7 +83,7 @@ public class SurveyDialogue : StoppableDialogue
             {
                 // Should never happen. End the conversation.
                 await SendMsg(stepContext.Context!,
-                    "For some reason I can't find your login name in our chat history, which is very odd. Are you a guest? " +
+                    "Hi! It's the copilot feedback bot. For some reason I can't find your login name in our chat history, which is very odd. Are you a guest? " +
                     "It looks like I can't do much without this so, bye!");
                 return await stepContext.EndDialogAsync();
             }

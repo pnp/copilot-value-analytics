@@ -170,7 +170,11 @@
               "name": "ImportAuthConfig__Authority",
               "value": "https://login.microsoftonline.com/organizations"
             },
-
+            {
+              "name": "DevMode",
+              "value": "true"
+            },
+            
             {
               "name": "WebAuthConfig__ClientId",
               "value": "[parameters('web_account_client_id')]"
@@ -335,7 +339,10 @@
                   "name": "AppCatalogTeamAppId",
                   "value": "[parameters('app_catalog_team_app_id')]"
                 },
-
+                {
+                  "name": "DevMode",
+                  "value": "true"
+                },
                 {
                   "name": "ImportAuthConfig__ClientId",
                   "value": "[parameters('service_account_client_id')]"
@@ -484,7 +491,11 @@
                   "name": "ImportAuthConfig__Authority",
                   "value": "https://login.microsoftonline.com/organizations"
                 },
-                
+                {
+                  "name": "DevMode",
+                  "value": "true"
+                },
+
                 {
                   "name": "MicrosoftAppId",
                   "value": "[parameters('service_account_client_id')]"
