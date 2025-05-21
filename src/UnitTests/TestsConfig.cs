@@ -10,9 +10,16 @@ public class TestsConfig : AppConfig
     {
     }
 
+    /// <summary>
+    /// Example: https://m365x35901285-my.sharepoint.com/personal/admin_m365x35901285_onmicrosoft_com/Documents/Employee%20Engagement%20Plan.docx
+    /// </summary>
     [ConfigValue]
     public string TestCopilotDocContextIdMySites { get; set; } = null!;
 
+
+    /// <summary>
+    /// Example: https://m365cp123890.sharepoint.com/sites/ProjectFalcon-InternalTeam/Shared%20Documents/Reports/Microsoft_Work_Trend_Index_Special_Report_2022_Full_Report.docx
+    /// </summary>
     [ConfigValue]
     public string TestCopilotDocContextIdSpSite { get; set; } = null!;
 

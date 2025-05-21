@@ -24,13 +24,20 @@ public class CopilotStringParseTests : AbstractTest
     [TestMethod]
     public void GetMeetingIdFragmentFromMeetingThreadUrl()
     {
+        // Test with a valid URL
         Assert.AreEqual("19:meeting_NDQ4MGRhYjgtMzc5MS00ZWMxLWJiZjEtOTIxZmM5Mzg3ZGFi@thread.v2",
             StringUtils.GetMeetingIdFragmentFromMeetingThreadUrl("https://microsoft.teams.com/threads/19:meeting_NDQ4MGRhYjgtMzc5MS00ZWMxLWJiZjEtOTIxZmM5Mzg3ZGFi@thread.v2"));
+
+        // Test with a URL that has extra segments and is HTTP encoded
+        Assert.AreEqual("19:meeting_ODkxODBiMDEtOTk2Yi00M2RjLTgxOWItMWE0NmEwNjI4MWFm@thread.v2",
+            StringUtils.GetMeetingIdFragmentFromMeetingThreadUrl("https://teams.microsoft.com/l/meetup-join/19%3ameeting_ODkxODBiMDEtOTk2Yi00M2RjLTgxOWItMWE0NmEwNjI4MWFm%40thread.v2/0?context=%7b%22Tid%22%3a%2250280b35-1c88-4a64-aaef-95357aad7204%22%2c%22Oid%22%3a%22981208f6-9303-4e8b-8a09-e8e2a9473b63%22%7d"));
+
+        // Test with a URL that does not contain a meeting ID
         Assert.IsNull(StringUtils.GetMeetingIdFragmentFromMeetingThreadUrl("https://microsoft.teams.com/"));
     }
 
     [TestMethod]
-    public void GetSiteUrl()
+    public void GetSiteUrlTests()
     {
         // My Site
         Assert.AreEqual("https://test.sharepoint.com/sites/test",
@@ -44,17 +51,21 @@ public class CopilotStringParseTests : AbstractTest
         Assert.IsNull(StringUtils.GetSiteUrl("https://test.sharepoint.com/"));
 
         Assert.AreEqual("https://m365cp123890-my.sharepoint.com/personal/sambetts_m365cp123890_onmicrosoft_com",
-            global::ActivityImporter.Engine.StringUtils.GetSiteUrl(
+            StringUtils.GetSiteUrl(
             "https://m365cp123890-my.sharepoint.com/personal/sambetts_m365cp123890_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B0D86F64F-8435-430C-8979-FF46C00F7ACB%7D&file=Presentation.pptx&action=edit&mobileredirect=true")
             );
 
         // Root site doc
         Assert.AreEqual("https://m365cp123890.sharepoint.com",
-            global::ActivityImporter.Engine.StringUtils.GetSiteUrl(
+            StringUtils.GetSiteUrl(
             "https://m365cp123890.sharepoint.com/_layouts/15/Doc.aspx?sourcedoc=%7B0D86F64F-8435-430C-8979-FF46C00F7ACB%7D&file=Presentation.pptx&action=edit&mobileredirect=true")
             );
         Assert.AreEqual("https://m365cp123890.sharepoint.com",
-            global::ActivityImporter.Engine.StringUtils.GetSiteUrl("https://m365cp123890.sharepoint.com/Doc.docx"));
+            StringUtils.GetSiteUrl("https://m365cp123890.sharepoint.com/Doc.docx"));
+
+        // Non-root SP site doc
+        Assert.AreEqual("https://m365x35901285.sharepoint.com/sites/Invoices",
+            StringUtils.GetSiteUrl("https://m365x35901285.sharepoint.com/:x:/r/sites/Invoices/_layouts/15/Doc.aspx?sourcedoc=%7BF4372559-F4D8-44DD-BF9F-38C41BD8DBA0%7D&file=Invoices%20Scanned.xlsx&action=default&mobileredirect=true"));
     }
 
     [TestMethod]
@@ -72,8 +83,8 @@ public class CopilotStringParseTests : AbstractTest
     [TestMethod]
     public void GetDriveItemId()
     {
-        Assert.IsNull(StringUtils.GetDriveItemId("https://test.sharepoint.com/sites/test"));
-        Assert.AreEqual(StringUtils.GetDriveItemId(
+        Assert.IsNull(StringUtils.GetDriveItemIdFromSourceDocParam("https://test.sharepoint.com/sites/test"));
+        Assert.AreEqual(StringUtils.GetDriveItemIdFromSourceDocParam(
             "https://m365cp123890-my.sharepoint.com/personal/sambetts_m365cp123890_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B0D86F64F-8435-430C-8979-FF46C00F7ACB%7D&file=Presentation.pptx&action=edit&mobileredirect=true"),
             "0D86F64F-8435-430C-8979-FF46C00F7ACB");
     }

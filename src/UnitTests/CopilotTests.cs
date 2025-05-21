@@ -406,12 +406,15 @@ public class CopilotTests : AbstractTest
 
         // Test a file from users OneDrive (my site)
         var mySiteFileInfo = await loader.GetSpoFileInfo(_config.TestCopilotDocContextIdMySites, _config.TestCopilotEventUPN);
+
+        Assert.IsNotNull(mySiteFileInfo);
         Assert.AreEqual(mySiteFileInfo?.Extension, _config.MySitesFileExtension);
         Assert.AreEqual(mySiteFileInfo?.Filename, _config.MySitesFileName);
         Assert.AreEqual(mySiteFileInfo?.Url, _config.MySitesFileUrl);
 
         // Test a file from a team site
         var spSiteFileInfo = await loader.GetSpoFileInfo(_config.TestCopilotDocContextIdSpSite, _config.TestCopilotEventUPN);
+        Assert.IsNotNull(spSiteFileInfo);
         Assert.AreEqual(spSiteFileInfo?.Extension, _config.TeamSiteFileExtension);
         Assert.AreEqual(spSiteFileInfo?.Filename, _config.TeamSitesFileName);
         Assert.AreEqual(spSiteFileInfo?.Url, _config.TeamSiteFileUrl);

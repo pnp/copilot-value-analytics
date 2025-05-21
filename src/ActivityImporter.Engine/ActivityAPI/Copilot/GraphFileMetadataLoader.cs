@@ -80,10 +80,11 @@ public class GraphFileMetadataLoader : ICopilotMetadataLoader
         ListItem? item;
         var site = await _siteGraphCache.GetResourceOrNullIfNotExists(spSiteId);
 
-        var driveItemId = StringUtils.GetDriveItemId(copilotDocContextId);
+        var driveItemId = StringUtils.GetDriveItemIdFromSourceDocParam(copilotDocContextId);
         if (driveItemId != null)
         {
-
+            // The URL contains a driveItemId, so we can get the item directly
+            // Example: https://contoso-my.sharepoint.com/personal/sambetts_contoso_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B0D86F64F-8435-430C-8979-FF46C00F7ACB%7D&file=Presentation.pptx&action=edit&mobileredirect=true
             try
             {
                 item = await _graphServiceClient.Sites[spSiteId].Lists[spListId].Items[driveItemId]

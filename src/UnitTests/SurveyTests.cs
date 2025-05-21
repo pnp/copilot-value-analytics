@@ -227,6 +227,21 @@ public class SurveyTests : AbstractTest
         Assert.AreEqual(1, ac.BooleanSurveyAnswers.Count);
     }
 
+    [TestMethod]
+    public async Task SurveyManagerGetAllPublishedSurveyQuestionResponses()
+    {
+        var sm = new SurveyManager(
+            new SqlSurveyManagerDataLoader(_db, GetLogger<SqlSurveyManagerDataLoader>()),
+            new FakeSurveyProcessor(),
+            GetLogger<SurveyManager>());
+
+
+        var data = await sm.GetSurveyQuestionResponses();
+        var r = new SurveysReport(data);
+
+        Assert.IsNotNull(r);
+    }
+
 
     [TestMethod]
     public async Task SurveySaveAndLoadTests()
@@ -260,7 +275,7 @@ public class SurveyTests : AbstractTest
             DataType = QuestionDatatype.String,
             OptimalAnswerValue = "Don't hurt me",
             OptimalAnswerLogicalOp = LogicalOperator.Equals,
-            QuestionText = "What is love?",
+            QuestionText = "What is love? " + DateTime.Now.Ticks,
             Index = 0,
         };
         var newIntQ = new SurveyQuestionDefinitionDB
@@ -268,7 +283,7 @@ public class SurveyTests : AbstractTest
             DataType = QuestionDatatype.Int,
             OptimalAnswerValue = "2",
             OptimalAnswerLogicalOp = LogicalOperator.Equals,
-            QuestionText = "What is 1+1?",
+            QuestionText = "What is 1+1? " + DateTime.Now.Ticks,
             Index = 2,
         };
         var newBoolQ = new SurveyQuestionDefinitionDB
@@ -276,7 +291,7 @@ public class SurveyTests : AbstractTest
             DataType = QuestionDatatype.Bool,
             OptimalAnswerValue = "True",
             OptimalAnswerLogicalOp = LogicalOperator.Equals,
-            QuestionText = "True?",
+            QuestionText = "True? " + DateTime.Now.Ticks,
             Index = 4,
         };
         _db.SurveyQuestionDefinitions.AddRange(newStringQ, newIntQ, newBoolQ);
@@ -354,7 +369,8 @@ public class SurveyTests : AbstractTest
                     OptimalAnswerLogicalOp = LogicalOperator.Unknown,
                 },
                 ValueGiven = "Don't hurt me",
-            }.IsPositiveResult;
+            };
+            unknownSurveyQ.SetIsPositiveResult();
         });
 
         var stringEqualsSurveyQ = new StringSurveyAnswer
@@ -369,10 +385,12 @@ public class SurveyTests : AbstractTest
         };
 
         // Check that the expected value is equal to the value given
+        stringEqualsSurveyQ.SetIsPositiveResult();
         Assert.IsTrue(stringEqualsSurveyQ.IsPositiveResult);
 
         // Check a false value
         stringEqualsSurveyQ.Question.OptimalAnswerLogicalOp = LogicalOperator.NotEquals;
+        stringEqualsSurveyQ.SetIsPositiveResult();
         Assert.IsFalse(stringEqualsSurveyQ.IsPositiveResult);
 
         var intEqualsSurveyQ = new IntSurveyAnswer
@@ -385,10 +403,13 @@ public class SurveyTests : AbstractTest
             },
             ValueGiven = 2
         };
+
+        intEqualsSurveyQ.SetIsPositiveResult();
         Assert.IsTrue(intEqualsSurveyQ.IsPositiveResult);
 
         // Check a false value
         intEqualsSurveyQ.Question.OptimalAnswerLogicalOp = LogicalOperator.NotEquals;
+        intEqualsSurveyQ.SetIsPositiveResult();
         Assert.IsFalse(intEqualsSurveyQ.IsPositiveResult);
 
         var intGTSurveyQ = new IntSurveyAnswer
@@ -401,10 +422,12 @@ public class SurveyTests : AbstractTest
             },
             ValueGiven = 4
         };
+        intGTSurveyQ.SetIsPositiveResult();
         Assert.IsTrue(intGTSurveyQ.IsPositiveResult);
 
         // Check a false value
         intGTSurveyQ.Question.OptimalAnswerLogicalOp = LogicalOperator.LessThan;
+        intGTSurveyQ.SetIsPositiveResult();
         Assert.IsFalse(intGTSurveyQ.IsPositiveResult);
 
         var intLTSurveyQ = new IntSurveyAnswer
@@ -417,11 +440,12 @@ public class SurveyTests : AbstractTest
             },
             ValueGiven = 9
         };
-
+        intLTSurveyQ.SetIsPositiveResult();
         Assert.IsTrue(intLTSurveyQ.IsPositiveResult);
 
         // Check a false value
         intLTSurveyQ.Question.OptimalAnswerLogicalOp = LogicalOperator.GreaterThan;
+        intLTSurveyQ.SetIsPositiveResult();
         Assert.IsFalse(intLTSurveyQ.IsPositiveResult);
 
         var boolSurveyQ = new BooleanSurveyAnswer
@@ -434,10 +458,13 @@ public class SurveyTests : AbstractTest
             },
             ValueGiven = true
         };
+        boolSurveyQ.SetIsPositiveResult();
         Assert.IsTrue(boolSurveyQ.IsPositiveResult);
 
         // Check a false value
+        boolSurveyQ.SetIsPositiveResult();
         boolSurveyQ.Question.OptimalAnswerLogicalOp = LogicalOperator.NotEquals;
+        boolSurveyQ.SetIsPositiveResult();
         Assert.IsFalse(boolSurveyQ.IsPositiveResult);
     }
 }

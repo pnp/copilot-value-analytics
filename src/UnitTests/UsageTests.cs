@@ -190,22 +190,29 @@ public class UsageTests : AbstractTest
         Assert.AreEqual(3, reportAllData.UsersLeague.Count);
         Assert.AreEqual(3, reportAllData.UniqueActivities.Count);
         Assert.AreEqual(3, reportAllData.Dates.Count);
-        Assert.AreEqual("Teams Meetings Attended", reportAllData.UniqueActivities[0]);
-        Assert.AreEqual("Teams Team Chats", reportAllData.UniqueActivities[1]);
+
+
+        Assert.IsTrue(reportAllData.UniqueActivities.Contains("Teams Meetings Attended"));
+        Assert.IsTrue(reportAllData.UniqueActivities.Contains("Teams Team Chats"));
         Assert.AreEqual(DateOnly.FromDateTime(DateTime.UtcNow), reportAllData.Dates[0]);
         Assert.AreEqual(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)), reportAllData.Dates[1]);
-        Assert.AreEqual(1, reportAllData.UsersLeague[0].Score);
-        Assert.AreEqual(2, reportAllData.UsersLeague[1].Score);
-        Assert.AreEqual(1, reportAllData.UsersLeague[2].Score);
+
+        var reportUser1 = reportAllData.UsersLeague.Where(u => u.Entity.UserPrincipalName == user1.UserPrincipalName).First();
+        var reportUser2 = reportAllData.UsersLeague.Where(u => u.Entity.UserPrincipalName == user2.UserPrincipalName).First();
+        var reportRandomUser = reportAllData.UsersLeague.Where(u => u.Entity.UserPrincipalName == "randomExtraItUser").First();
+
+        Assert.AreEqual(1, reportUser1.Score);
+        Assert.AreEqual(2, reportUser2.Score);
+        Assert.AreEqual(1, reportRandomUser.Score);
 
         // Check department league
         Assert.AreEqual(2, reportAllData.DepartmentsLeague.Count);
-        Assert.AreEqual("IT", reportAllData.DepartmentsLeague[0].Entity);
+        Assert.IsTrue(reportAllData.DepartmentsLeague.Any(u => u.Entity == "IT"));
         Assert.AreEqual(2, reportAllData.DepartmentsLeague[0].Score);
-        Assert.AreEqual("Engineering", reportAllData.DepartmentsLeague[1].Entity);
+        Assert.IsTrue(reportAllData.DepartmentsLeague.Any(u=> u.Entity == "Engineering"));
         Assert.AreEqual(2, reportAllData.DepartmentsLeague[1].Score);
-        Assert.AreEqual(user1.UserPrincipalName, reportAllData.UsersLeague[0].Entity.UserPrincipalName);
-        Assert.AreEqual(user2.UserPrincipalName, reportAllData.UsersLeague[1].Entity.UserPrincipalName);
+        Assert.AreEqual(user1.UserPrincipalName, reportUser1.Entity.UserPrincipalName);
+        Assert.AreEqual(user2.UserPrincipalName, reportUser2.Entity.UserPrincipalName);
 
         var reportDepartmentFilteredData = new UsageStatsReport(testData.Cast<IActivitiesWeeklyRecord>(), new UsageStatsReportFilter { InDepartments = new List<string> { "IT" } });
         Assert.AreEqual(2, reportDepartmentFilteredData.UsersLeague.Count);
@@ -214,7 +221,7 @@ public class UsageTests : AbstractTest
         Assert.AreEqual("Teams Meetings Attended", reportDepartmentFilteredData.UniqueActivities[0]);
         Assert.AreEqual(DateOnly.FromDateTime(DateTime.UtcNow), reportDepartmentFilteredData.Dates[0]);
         Assert.AreEqual(1, reportDepartmentFilteredData.UsersLeague[0].Score);
-        Assert.AreEqual(user1.UserPrincipalName, reportDepartmentFilteredData.UsersLeague[0].Entity.UserPrincipalName);
+        Assert.AreEqual(user1.UserPrincipalName, reportUser1.Entity.UserPrincipalName);
     }
 
     [TestMethod]

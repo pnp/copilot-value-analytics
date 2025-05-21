@@ -10,9 +10,9 @@ public class SurveysReport
     public SurveysReport(SurveyAnswersCollection fromData) : this()
     {
         this.Answers = fromData;
-        var stringStats = GetStats(fromData.StringSurveyAnswers.Cast<BaseSurveyAnswer>());
-        var intStats = GetStats(fromData.IntSurveyAnswers.Cast<BaseSurveyAnswer>());
-        var boolStats = GetStats(fromData.BooleanSurveyAnswers.Cast<BaseSurveyAnswer>());
+        var stringStats = GetStats(fromData.StringSurveyAnswers);
+        var intStats = GetStats(fromData.IntSurveyAnswers);
+        var boolStats = GetStats(fromData.BooleanSurveyAnswers);
 
         var allStats = new List<QuestionStats> { stringStats, intStats, boolStats };
         var compiledStats = new QuestionStats();
@@ -36,19 +36,42 @@ public class SurveysReport
         }
         Stats = compiledStats;
 
-        var allResults = Answers.StringSurveyAnswers
-                .Select(a => a.IsPositiveResult)
-                .Concat(Answers.IntSurveyAnswers.Select(a => a.IsPositiveResult))
-                .Concat(Answers.BooleanSurveyAnswers.Select(a => a.IsPositiveResult));
+        var allPositiveResults = GetPositive<string>(Answers.StringSurveyAnswers)
+                .Concat(GetPositive<int>(Answers.IntSurveyAnswers))
+                .Concat(GetPositive(Answers.BooleanSurveyAnswers));
 
-        if (allResults.Count() == 0)
+
+        var allResultsCount = Answers.StringSurveyAnswers.Count() + Answers.IntSurveyAnswers.Count() + Answers.BooleanSurveyAnswers.Count();
+
+        if (allPositiveResults.Count() == 0)
         {
             PercentageOfAnswersWithPositiveResult = 0;
         }
         else
         {
-            PercentageOfAnswersWithPositiveResult = (long)(allResults.Count(a => a) * 100 / allResults.Count());
+            PercentageOfAnswersWithPositiveResult = (long)(allPositiveResults.Count() * 100 / allResultsCount);
         }
+    }
+
+    private List<BaseSurveyAnswer> GetPositive<T>(IEnumerable<SurveyAnswer<T>> surveyAnswers) where T : notnull
+    {
+        List<BaseSurveyAnswer> allAnswers = new();
+        foreach (var item in surveyAnswers)
+        {
+            try
+            {
+                item.SetIsPositiveResult();      // This might blow up if data is invalid
+                if (item.IsPositiveResult!.Value)
+                {
+                    allAnswers.Add(item);
+                }
+            }
+            catch (SurveyEngineDataException)
+            {
+                // Ignore invalid answers
+            }
+        }
+        return allAnswers;
     }
 
     public SurveyAnswersCollection Answers { get; set; } = new();
@@ -57,18 +80,36 @@ public class SurveysReport
 
     public QuestionStats Stats { get; set; } = new QuestionStats();
 
-    static QuestionStats GetStats(IEnumerable<BaseSurveyAnswer> datoir)
+    static QuestionStats GetStats<T>(IEnumerable<SurveyAnswer<T>> datoir) where T : notnull
     {
         var stats = new QuestionStats();
         var allQuestions = datoir.Select(a => a.GetAnswerString()).Distinct();
         foreach (var q in allQuestions)
         {
             var answerResultsForQuestion = datoir
-                .Where(a => a.GetAnswerString() == q)
-                .Select(a => a.IsPositiveResult);
+                .Where(a => a.GetAnswerString() == q);
 
-            var positiveCount = answerResultsForQuestion.Count(positive => positive);
-            var negativeCount = answerResultsForQuestion.Count(positive => !positive);
+            var positiveCount = 0;
+            var negativeCount = 0;
+            foreach (var item in answerResultsForQuestion)
+            {
+                try
+                {
+                    item.SetIsPositiveResult(); // This might blow up if data is invalid
+                    if (item.IsPositiveResult!.Value)      
+                    {
+                        positiveCount++;
+                    }
+                    else
+                    {
+                        negativeCount++;
+                    }
+                }
+                catch (SurveyEngineDataException)
+                {
+                    // Ignore invalid answers
+                }
+            }
 
             if (positiveCount > stats.HighestPositiveAnswerQuestion.Score)
             {

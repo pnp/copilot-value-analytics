@@ -1,4 +1,6 @@
-﻿using System.Web;
+﻿using Microsoft.Extensions.FileSystemGlobbing.Internal;
+using System.Text.RegularExpressions;
+using System.Web;
 
 namespace ActivityImporter.Engine;
 
@@ -19,7 +21,7 @@ public class StringUtils
 
     // Example copilotDocContextId in: https://contoso-my.sharepoint.com/personal/alex_contoso_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B1F9103E2-34CF-4560-8458-BD3296201FA9%7D&file=Document19.docx&action=default&mobileredirect=true
     // Out: 1F9103E2-34CF-4560-8458-BD3296201FA9 - the drive item ID
-    public static string? GetDriveItemId(string copilotDocContextId)
+    public static string? GetDriveItemIdFromSourceDocParam(string copilotDocContextId)
     {
         var uri = new Uri(copilotDocContextId);
         var query = HttpUtility.ParseQueryString(uri.Query);
@@ -40,6 +42,9 @@ public class StringUtils
         return Uri.TryCreate(url, UriKind.Absolute, out _);
     }
 
+    /// <summary>
+    /// Returns the root site URL from a Copilot context ID.
+    /// </summary>
     public static string? GetSiteUrl(string copilotDocContextId)
     {
         if (!IsValidAbsoluteUrl(copilotDocContextId))
@@ -50,8 +55,20 @@ public class StringUtils
 
         const string SEP = "/";
 
+        // Office Online URLs have a different format, so we need to handle them separately.
+        // Example: https://contoso.sharepoint.com/:x:/r/sites/Invoices -> https://contoso.sharepoint.com/sites/Invoices
+        const string OFFICE_SEGMENT = @":(\w):/r/";
+        var officeOnlineMatch = Regex.Match(copilotDocContextId, OFFICE_SEGMENT);
+
+        var urlToProcess = uri.AbsolutePath;
+        if (officeOnlineMatch.Success)
+        {
+            urlToProcess = urlToProcess.Replace(officeOnlineMatch.Value, string.Empty);
+        }
+
+        
         // Remove SharePoint app pages (layouts)
-        var absoluteUriMinusQueryAndAppPages = uri.AbsolutePath.Replace("/_layouts/15", "");
+        var absoluteUriMinusQueryAndAppPages = urlToProcess.Replace("/_layouts/15", "");
 
         var urlSegments = absoluteUriMinusQueryAndAppPages.Split(SEP, StringSplitOptions.RemoveEmptyEntries).ToList();
 
@@ -106,13 +123,25 @@ public class StringUtils
     /// </summary>
     public static string? GetMeetingIdFragmentFromMeetingThreadUrl(string copilotDocContextId)
     {
+        var decodedUrl = HttpUtility.UrlDecode(copilotDocContextId);
         const string START = "19:meeting_";
-        var start = copilotDocContextId.IndexOf(START);
+        var start = decodedUrl.IndexOf(START);
         if (start == -1)
         {
             return null;
         }
-        var meetingId = copilotDocContextId.Substring(start, copilotDocContextId.Length - start);
+
+        var stringStart = decodedUrl.Substring(start, decodedUrl.Length - start);
+
+        // Find "v2" 
+        const string END = "@thread.v2";
+        var end = stringStart.IndexOf(END, start);
+        if (end == -1)
+        {
+            return null;
+        }
+
+        var meetingId = stringStart.Substring(0, end + END.Length);
         return meetingId;
     }
 

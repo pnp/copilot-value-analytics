@@ -7,7 +7,7 @@ namespace Common.Engine.Surveys.Model;
 /// </summary>
 public abstract class BaseSurveyAnswer
 {
-    public abstract bool IsPositiveResult { get; }
+    public bool? IsPositiveResult { get; set; }
     public abstract string GetAnswerString();
 }
 
@@ -31,32 +31,36 @@ public abstract class SurveyAnswer<T> : BaseSurveyAnswer where T : notnull
         return Question.QuestionText;
     }
 
-    public override bool IsPositiveResult
+    public bool IsValid => Question.OptimalAnswerLogicalOp != LogicalOperator.Unknown;
+
+    public void SetIsPositiveResult()
     {
-        get
+        if (Question.OptimalAnswerLogicalOp == LogicalOperator.Unknown)
+            throw new SurveyEngineDataException($"{nameof(Question.OptimalAnswerLogicalOp)} is {nameof(LogicalOperator.Unknown)}");
+
+        if (Question.OptimalAnswerLogicalOp == LogicalOperator.Equals)
         {
-            if (Question.OptimalAnswerLogicalOp == LogicalOperator.Unknown)
-                throw new SurveyEngineDataException($"{nameof(Question.OptimalAnswerLogicalOp)} is {nameof(LogicalOperator.Unknown)}");
-
-            if (Question.OptimalAnswerLogicalOp == LogicalOperator.Equals)
-            {
-                return ValueGiven.Equals(Question.OptimalAnswer);
-            }
-            else if (Question.OptimalAnswerLogicalOp == LogicalOperator.NotEquals)
-            {
-                return !ValueGiven.Equals(Question.OptimalAnswer);
-            }
-            else if (Question.OptimalAnswerLogicalOp == LogicalOperator.GreaterThan)
-            {
-                return IsAnswerTrueForExpectedComparativeVal(LogicalOperator.GreaterThan);
-            }
-            else if (Question.OptimalAnswerLogicalOp == LogicalOperator.LessThan)
-            {
-                return IsAnswerTrueForExpectedComparativeVal(LogicalOperator.LessThan);
-            }
-
-            throw new SurveyEngineLogicException();
+            this.IsPositiveResult = ValueGiven.Equals(Question.OptimalAnswer);
+            return;
         }
+        else if (Question.OptimalAnswerLogicalOp == LogicalOperator.NotEquals)
+        {
+            this.IsPositiveResult = !ValueGiven.Equals(Question.OptimalAnswer);
+            return;
+        }
+        else if (Question.OptimalAnswerLogicalOp == LogicalOperator.GreaterThan)
+        {
+            this.IsPositiveResult = IsAnswerTrueForExpectedComparativeVal(LogicalOperator.GreaterThan);
+            return;
+        }
+        else if (Question.OptimalAnswerLogicalOp == LogicalOperator.LessThan)
+        {
+            this.IsPositiveResult = IsAnswerTrueForExpectedComparativeVal(LogicalOperator.LessThan);
+            return;
+        }
+
+        throw new SurveyEngineLogicException();
+
     }
 
     protected abstract bool IsAnswerTrueForExpectedComparativeVal(LogicalOperator op);
