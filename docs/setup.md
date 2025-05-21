@@ -20,12 +20,13 @@ You need Teams admin rights and rights to assign sensitive privileges for this s
 Docker is used in this guide just because it gives a consistent build process, but is not essential. You could also build and publish with GitHub actions. 
 
 ## Requirements
-Check the [prerequisites](prereqs.md) document before attempting setup. 
+Check the [prerequisites](prereqs.md) document before attempting setup. Permissions need to be assigned to the bot identity once the bot is created. 
 
 ## Create Bot with new App ID
 1. Go to: https://dev.teams.microsoft.com/bots and create a new bot (or alternatively in the Azure Portal, create a new Azure bot - the 1st link doesn't require an Azure subscription).
 2. Create a new client secret for the bot application registration. Note down the client ID & the secret of the bot.
-3. Grant permissions (specified below) and have an admin grant consent.
+3. Grant permissions (specified in the [prerequisites](prereqs.md)) and have an admin grant consent.
+4. Recommended: allow importer to read online meetings by configuring [application access](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy#configure-application-access-policy)
 
 ## Create Web App Registration
 In Entra ID, create a new application registration for the JavaScript Teams admin app.
