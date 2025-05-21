@@ -14,7 +14,8 @@ You need Teams admin rights and rights to assign sensitive privileges for this s
 5. Build a docker images for bot + JavaScript application, and functions app. Requires configuration info from bot app.
 6. Push image to Azure container registry created in step 3.
 7. Deploy compute components to Container Apps Environment with published docker images.
-8. Verify deployment.
+8. Update bot messaging endpoint. 
+9. Verify deployment.
 
 Docker is used in this guide just because it gives a consistent build process, but is not essential. You could also build and publish with GitHub actions. 
 
@@ -146,6 +147,15 @@ Compute components:
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpnp%2Fcopilot-feedback-bot%2Fmain%2Fdeploy%2FARM%2Ftemplate-compute.json)
 
 Templates are ``deploy/ARM/template-backend.json`` and ``deploy/ARM/template-compute.json`` in this repository if you wish to copy/paste into the portal manually. 
+
+## Update bot Messaging Endpoint
+You've created the bot, deployed the application, but you still need to update the Azure/Teams bot configuration with the messaging endpoint.
+Go back to: https://dev.teams.microsoft.com/bots
+
+Find your bot and update your "endpoint address" field with:
+ ``https://[name].azurefd.net/api/messages``
+
+That way messages will work to/from the bot in Teams. 
 
 ## Required Configuration 
 These configuration settings are needed in the app service & functions app:
