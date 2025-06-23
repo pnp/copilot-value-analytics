@@ -284,7 +284,7 @@ public class CopilotTests : AbstractTest
         _db.AuditEventsCommon.Add(commonOutlook);
         await _db.SaveChangesAsync();
 
-        var preAgentsCount = await _db.CopilotAgentTypes.CountAsync();
+        var preAgentsCount = await _db.CopilotAgents.CountAsync();
         await copilotEventAdaptor.SaveSingleCopilotEventToSqlStaging(new CopilotAuditLogContent { CopilotEventData = meeting, AgentName = "Test Agent Meeting " + DateTime.Now.Ticks, AgentId = "Unit testing1 " + DateTime.Now.Ticks }, commonEventMeeting);
         await copilotEventAdaptor.SaveSingleCopilotEventToSqlStaging(new CopilotAuditLogContent { CopilotEventData = docEvent, AgentName = "Test Agent Doc " + DateTime.Now.Ticks, AgentId = "Unit testing2 " + DateTime.Now.Ticks }, commonEventDocEdit);
         await copilotEventAdaptor.SaveSingleCopilotEventToSqlStaging(new CopilotAuditLogContent { CopilotEventData = teamsChat, AgentName = "Test Agent Chat " + DateTime.Now.Ticks, AgentId = "Unit testing3 " + DateTime.Now.Ticks }, commonEventChat);
@@ -292,7 +292,7 @@ public class CopilotTests : AbstractTest
         await copilotEventAdaptor.CommitAllChanges();
 
         // Check agent counts include newly defined agents
-        var postAgents = await _db.CopilotAgentTypes.ToListAsync();
+        var postAgents = await _db.CopilotAgents.ToListAsync();
         Assert.IsTrue(postAgents.Count == preAgentsCount + 4); // 4 new agents - 1 per test
 
         Assert.IsTrue(postAgents.Any(x => x.Name.Contains("Test Agent Meeting")));

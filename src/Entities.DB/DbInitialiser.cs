@@ -23,59 +23,69 @@ public class DbInitialiser
         if (createdNewDb)
         {
             logger.LogInformation("Database created");
+
+
+            if (insertDebug)
+            {
+                // Insert fake user metadata
+
+                logger.LogInformation("Adding debugging test data");
+
+
+                // Insert fake job titles
+                var fakeJobTitles = new List<UserJobTitle>
+                    {
+                        new UserJobTitle { Name = "Software Engineer" },
+                        new UserJobTitle { Name = "Product Manager" },
+                        new UserJobTitle { Name = "Data Analyst" },
+                        new UserJobTitle { Name = "Sales Representative" },
+                        new UserJobTitle { Name = "Marketing Specialist" }
+                    };
+                context.UserJobTitles.AddRange(fakeJobTitles);
+
+                // Insert fake office locations
+                var fakeUserOfficeLocations = new List<UserOfficeLocation>
+                    {
+                        new UserOfficeLocation { Name = "Head Office" },
+                        new UserOfficeLocation { Name = "Remote" },
+                        new UserOfficeLocation { Name = "Branch Office" },
+                        new UserOfficeLocation { Name = "Satellite Office" }
+                    };
+                context.UserOfficeLocations.AddRange(fakeUserOfficeLocations);
+
+                // Insert fake company names
+                var fakeCompanyNames = new List<CompanyName>
+                    {
+                        new CompanyName { Name = "Contoso" },
+                        new CompanyName { Name = "Fabrikam" },
+                        new CompanyName { Name = "Northwind Traders" },
+                        new CompanyName { Name = "Adventure Works" }
+                    };
+                context.CompanyNames.AddRange(fakeCompanyNames);
+
+                // Insert fake departments
+                var fakeDepartments = new List<UserDepartment>
+                    {
+                        new UserDepartment { Name = "Engineering" },
+                        new UserDepartment { Name = "Sales" },
+                        new UserDepartment { Name = "Marketing" },
+                        new UserDepartment { Name = "Finance" },
+                        new UserDepartment { Name = "Human Resources" }
+                    };
+                context.UserDepartments.AddRange(fakeDepartments);
+                await context.SaveChangesAsync();
+
+
+                // Insert new fake users that've used fake agents
+                await InsertFakeUsersWithAgents(context, logger);
+
+                await DirtyTestDataHackInserts(context, logger);
+                await context.SaveChangesAsync();
+            }
+
             if (defaultUserUPN != null)
             {
-                logger.LogInformation("Creating default user");
-                var defaultUser = new User
-                {
-                    UserPrincipalName = defaultUserUPN
-                };
-                context.Users.Add(defaultUser);
-                await context.SaveChangesAsync();
-
-                // Add base lookup data
-                logger.LogInformation("Adding base lookup data");
-
-                // Add some base activity types
-                var activityTypeDoc = new CopilotActivityType { Name = CopilotActivityType.Document };
-                var activityTypeMeeting = new CopilotActivityType { Name = CopilotActivityType.Meeting };
-                var activityTypeEmail = new CopilotActivityType { Name = CopilotActivityType.Email };
-                var activityTypeChat = new CopilotActivityType { Name = CopilotActivityType.Chat };
-                var activityTypeOther = new CopilotActivityType { Name = CopilotActivityType.Other };
-                context.CopilotActivityTypes.AddRange([activityTypeChat, activityTypeDoc, activityTypeEmail, activityTypeMeeting, activityTypeOther]);
-
-                // Add some base activities
-                context.CopilotActivities.Add(new CopilotActivity { Name = "Draft email", ActivityType = activityTypeEmail });
-                context.CopilotActivities.Add(new CopilotActivity { Name = "Summarise email", ActivityType = activityTypeEmail });
-
-                var editDoc = new CopilotActivity { Name = ACTIVITY_NAME_EDIT_DOC, ActivityType = activityTypeDoc };       // Need this later
-                context.CopilotActivities.Add(editDoc);
-                context.CopilotActivities.Add(new CopilotActivity { Name = "Summarise Document", ActivityType = activityTypeDoc });
-
-                var getHighlights = new CopilotActivity { Name = ACTIVITY_NAME_GET_HIGHLIGHTS, ActivityType = activityTypeMeeting };       // Need this later
-                context.CopilotActivities.Add(getHighlights);
-                context.CopilotActivities.Add(new CopilotActivity { Name = "Get decisions made", ActivityType = activityTypeMeeting });
-                context.CopilotActivities.Add(new CopilotActivity { Name = "Get open items", ActivityType = activityTypeMeeting });
-
-                context.CopilotActivities.Add(new CopilotActivity { Name = "Ask question", ActivityType = activityTypeChat });
-                context.CopilotActivities.Add(new CopilotActivity { Name = "Other", ActivityType = activityTypeOther });
-
-                // Add some base survey pages
-                AddTestSurveyPages(context);
-                if (insertDebug)
-                {
-                    logger.LogInformation("Adding debugging test data");
-                    await DirtyTestDataHackInserts(context, logger, editDoc, getHighlights);
-                    await context.SaveChangesAsync();
-
-                    await FakeDataGen.GenerateFakeCopilotFor(defaultUserUPN, context, logger);
-                }
-                else
-                {
-                    logger.LogInformation("Skipping debugging test data");
-                }
-
-                await context.SaveChangesAsync();
+                await GenerateTestDataForUser(defaultUserUPN, context, logger, insertDebug);
 
                 // Install profiling extensions
                 logger.LogInformation("Adding profiling extension");
@@ -91,6 +101,115 @@ public class DbInitialiser
                 logger.LogWarning("No default user set, skipping base data");
             }
         }
+    }
+
+    private static async Task GenerateTestDataForUser(string defaultUserUPN, DataContext context, ILogger logger, bool insertDebug)
+    {
+        logger.LogInformation("Creating default user");
+        var defaultUser = new User
+        {
+            UserPrincipalName = defaultUserUPN
+        };
+        context.Users.Add(defaultUser);
+        await context.SaveChangesAsync();
+
+        // Add some base survey pages
+        AddTestSurveyPages(context);
+        if (insertDebug)
+        {
+            // Generate some fake data
+            await FakeDataGen.GenerateFakeCopilotFor(defaultUserUPN, context, logger);
+            await FakeDataGen.GenerateFakeOfficeActivityFor(defaultUserUPN, DateTime.Now, context, logger);
+        }
+        else
+        {
+            logger.LogInformation("Skipping debugging test data");
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task InsertFakeUsersWithAgents(DataContext context, ILogger logger)
+    {
+        logger.LogInformation("Inserting fake users with agents");
+        var rnd = new Random();
+        var allUsers = await context.Users.ToListAsync();
+
+        var departments = await context.UserDepartments.ToListAsync();
+        var jobTitles = await context.UserJobTitles.ToListAsync();
+        var officeLocations = await context.UserOfficeLocations.ToListAsync();
+        var companyNames = await context.CompanyNames.ToListAsync();
+
+        if (departments.Count == 0 || jobTitles.Count == 0 ||
+            officeLocations.Count == 0 || companyNames.Count == 0)
+        {
+            logger.LogWarning("Not enough lookup data to create fake users. Skipping user creation.");
+            return;
+        }
+
+        // Add fake users
+        for (int i = 0; i < 10; i++)
+        {
+            // Get random department, job title, office location, and company name
+            if (context.UserDepartments.Count() == 0 || context.UserJobTitles.Count() == 0 ||
+                context.UserOfficeLocations.Count() == 0 || context.CompanyNames.Count() == 0)
+            {
+                logger.LogWarning("Not enough lookup data to create fake users. Skipping user creation.");
+                return;
+            }
+
+            var userNumber = allUsers.Count + i + 1;
+
+
+            var testUser = new User
+            {
+                UserPrincipalName = $"user-{userNumber}",
+                Department = departments[rnd.Next(departments.Count)],
+                JobTitle = jobTitles[rnd.Next(jobTitles.Count)],
+                OfficeLocation = officeLocations[rnd.Next(officeLocations.Count)],
+                CompanyName = companyNames[rnd.Next(companyNames.Count)],
+            };
+
+            allUsers.Add(testUser);
+            context.Users.Add(testUser);
+        }
+
+        var agentCount = await context.CopilotAgents.CountAsync();
+
+        // Add some fake agents
+        for (int i = 0; i < 10; i++)
+        {
+            var agentNumber = agentCount + i + 1;
+            var testAgent = new CopilotAgent
+            {
+                AgentID = $"agent-{agentNumber}",
+                Name = $"Test Agent {agentNumber}",
+            };
+            context.CopilotAgents.Add(testAgent);
+        }
+
+        // Add some fake chats with agents
+        var allChats = new List<CopilotChat>();
+        foreach (var chat in allUsers) {
+            for (int i = 0; i < rnd.Next(1, 10); i++)
+            {
+                var testChat = new CopilotChat
+                {
+                    AppHost = "DevBox",
+                    Agent = context.CopilotAgents.OrderBy(a => EF.Functions.Random()).FirstOrDefault(),
+                    AuditEvent = new CommonAuditEvent
+                    {
+                        User = chat,
+                        Id = Guid.NewGuid(),
+                        TimeStamp = DateTime.Now.AddDays(i * -1),
+                        Operation = new EventOperation { Name = "Chat op" }
+                    }
+                };
+                allChats.Add(testChat);
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 
     private static async Task ExecEmbeddedSql(string resourceName, DataContext context, ILogger logger)
@@ -124,47 +243,44 @@ public class DbInitialiser
             .Select(x => x.Trim(' ', '\n'));
     }
 
-    private static async Task DirtyTestDataHackInserts(DataContext context, ILogger logger, CopilotActivity editDocCopilotActivity, CopilotActivity getHighlightsCopilotActivity)
+    private static async Task DirtyTestDataHackInserts(DataContext context, ILogger logger)
     {
         var rnd = new Random();
         logger.LogInformation("Adding debugging test data");
+
+        // Add base lookup data
+        logger.LogInformation("Adding base lookup data");
+
+        // Add some base activity types
+        var activityTypeDoc = new CopilotActivityType { Name = CopilotActivityType.Document };
+        var activityTypeMeeting = new CopilotActivityType { Name = CopilotActivityType.Meeting };
+        var activityTypeEmail = new CopilotActivityType { Name = CopilotActivityType.Email };
+        var activityTypeChat = new CopilotActivityType { Name = CopilotActivityType.Chat };
+        var activityTypeOther = new CopilotActivityType { Name = CopilotActivityType.Other };
+        context.CopilotActivityTypes.AddRange([activityTypeChat, activityTypeDoc, activityTypeEmail, activityTypeMeeting, activityTypeOther]);
+
+        // Add some base activities
+        context.CopilotActivities.Add(new CopilotActivity { Name = "Draft email", ActivityType = activityTypeEmail });
+        context.CopilotActivities.Add(new CopilotActivity { Name = "Summarise email", ActivityType = activityTypeEmail });
+        context.CopilotActivities.Add(new CopilotActivity { Name = "Summarise Document", ActivityType = activityTypeDoc });
+
+        var getHighlightsCopilotActivity = new CopilotActivity { Name = ACTIVITY_NAME_GET_HIGHLIGHTS, ActivityType = activityTypeMeeting };       // Need this later
+        context.CopilotActivities.Add(getHighlightsCopilotActivity);
+        context.CopilotActivities.Add(new CopilotActivity { Name = "Get decisions made", ActivityType = activityTypeMeeting });
+        context.CopilotActivities.Add(new CopilotActivity { Name = "Get open items", ActivityType = activityTypeMeeting });
+
+        context.CopilotActivities.Add(new CopilotActivity { Name = "Ask question", ActivityType = activityTypeChat });
+        context.CopilotActivities.Add(new CopilotActivity { Name = "Other", ActivityType = activityTypeOther });
+
+
+        var editDocCopilotActivity = new CopilotActivity { Name = ACTIVITY_NAME_EDIT_DOC, ActivityType = activityTypeDoc };       // Need this later
+        context.CopilotActivities.Add(editDocCopilotActivity);
 
         var testCompany = new CompanyName { Name = "Contoso" };
         var testJobTitle = new UserJobTitle { Name = "Tester" };
         var testOfficeLocation = new UserOfficeLocation { Name = "Test Office" };
 
-        // Generate some fake departments
-        var allDepartments = new List<UserDepartment>();
-        List<string> departments =
-        [
-            "Marketing",
-                    "Sales",
-                    "Finance",
-                    "Human Resources",
-                    "Research and Development",
-                    "Production",
-                    "Quality Assurance",
-                    "Customer Service",
-                    "Logistics",
-                    "Legal",
-                ];
-        allDepartments.AddRange(departments.Select(d => new UserDepartment { Name = d }));
-        context.UserDepartments.AddRange(allDepartments);
-
-        // Add some fake users
-        var allUsers = new List<User>();
-        for (int i = 0; i < 10; i++)
-        {
-            var testUser = new User
-            {
-                UserPrincipalName = $"user-{i}",
-                Department = allDepartments[rnd.Next(0, allDepartments.Count - 1)]
-            };
-            allUsers.Add(testUser);
-        }
-        context.Users.AddRange(allUsers);
-        await context.SaveChangesAsync();
-
+        var allUsers = await context.Users.ToListAsync();
         foreach (var u in allUsers)
         {
             await FakeDataGen.GenerateFakeOfficeActivityFor(u.UserPrincipalName, DateTime.Now, context, logger);

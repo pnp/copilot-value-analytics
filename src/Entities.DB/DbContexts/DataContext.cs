@@ -46,7 +46,7 @@ public class DataContext : CommonContext
 
     public DbSet<UserSurveyResponseActivityType> SurveyResponseActivityTypes { get; set; }
     public DbSet<CopilotActivity> CopilotActivities { get; set; }
-    public DbSet<CopilotAgentType> CopilotAgentTypes { get; set; }
+    public DbSet<CopilotAgent> CopilotAgents { get; set; }
     public DbSet<CopilotActivityType> CopilotActivityTypes { get; set; }
 
 
@@ -126,7 +126,7 @@ public class DataContext : CommonContext
          .HasIndex(t => t.UrlBase)
          .IsUnique();
 
-        modelBuilder.Entity<CopilotAgentType>()
+        modelBuilder.Entity<CopilotAgent>()
          .HasIndex(t => t.AgentID)
          .IsUnique();
 

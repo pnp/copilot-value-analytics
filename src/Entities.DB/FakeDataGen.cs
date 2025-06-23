@@ -69,22 +69,34 @@ public class FakeDataGen
             Site = context.Sites.FirstOrDefault() ?? new Entities.SP.Site { UrlBase = "https://copilot.sharepoint.com" },
         });
 
-        // Add an agent chat event
-        var randomAgent = await context.CopilotAgentTypes
-            .OrderBy(e => Guid.NewGuid())
-            .FirstOrDefaultAsync();
-        context.Add(new CopilotChat
+        // Add agent chat events for last 14 days
+        var rnd = new Random();
+        for (int daysBack = 0; daysBack < 14; daysBack++)
         {
-            AppHost = "Teams",
-            AuditEvent = new CommonAuditEvent
+            for (int differentAgentChats = 0; differentAgentChats < rnd.Next(1, 5); differentAgentChats++)
             {
-                User = user,
-                Id = Guid.NewGuid(),
-                TimeStamp = DateTime.Now.AddDays(-3),
-                Operation = new EventOperation { Name = "Agent operation " + DateTime.Now.Ticks }
-            },
-            Agent = randomAgent
-        });
+                var randomAgent = await context.CopilotAgents
+                    .OrderBy(e => Guid.NewGuid())
+                    .FirstOrDefaultAsync();
+                for (int chatsPerDayWithAgent = 0; chatsPerDayWithAgent < rnd.Next(1, 9); chatsPerDayWithAgent++)
+                {
+                    context.Add(new CopilotChat
+                    {
+                        AppHost = "Teams",
+                        AuditEvent = new CommonAuditEvent
+                        {
+                            User = user,
+                            Id = Guid.NewGuid(),
+                            TimeStamp = DateTime.Now.AddDays(daysBack * -1),
+                            Operation = new EventOperation { Name = "Agent operation " + DateTime.Now.Ticks }
+                        },
+                        Agent = randomAgent
+                    });
+                }
+            }
+
+        }
+
     }
 
     public static async Task GenerateFakeOfficeActivityFor(string forUpn, DateTime forWhen, DataContext context, ILogger logger)

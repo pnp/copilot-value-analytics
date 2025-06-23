@@ -23,7 +23,7 @@ public class CopilotActivityType : AbstractEFEntityWithName
 }
 
 [Table("copilot_agents")]
-public class CopilotAgentType : AbstractEFEntityWithName
+public class CopilotAgent : AbstractEFEntityWithName
 {
     [Column("agent_id")]
     public string AgentID { get; set; } = null!;
