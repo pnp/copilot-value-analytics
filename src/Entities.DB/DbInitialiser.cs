@@ -76,6 +76,15 @@ public class DbInitialiser
                 await context.SaveChangesAsync();
 
 
+                // Insert fake license types
+                var fakeLicenseTypes = new List<LicenseType>
+                    {
+                        new LicenseType { SKUID = "E3-dev-testing", Name = "Microsoft 365 E3" },
+                        new LicenseType { SKUID = "E5-dev-testing", Name = "Microsoft 365 E5" },
+                        new LicenseType { SKUID = "F3-dev-testing", Name = "Microsoft 365 F3" }
+                    };
+                context.LicenseTypes.AddRange(fakeLicenseTypes);
+
                 // Insert new fake users that've used fake agents
                 await InsertFakeUsersWithAgents(context, logger);
 

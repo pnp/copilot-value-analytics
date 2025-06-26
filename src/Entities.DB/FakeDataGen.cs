@@ -95,6 +95,21 @@ public class FakeDataGen
                 }
             }
 
+            // Add non-agent chat events for last 14 days
+            for (int nonAgentChats = 0; nonAgentChats < rnd.Next(1, 5); nonAgentChats++)
+            {
+                context.Add(new CopilotChat
+                {
+                    AppHost = "Teams",
+                    AuditEvent = new CommonAuditEvent
+                    {
+                        User = user,
+                        Id = Guid.NewGuid(),
+                        TimeStamp = DateTime.Now.AddDays(daysBack * -1),
+                        Operation = new EventOperation { Name = "Non-agent operation " + DateTime.Now.Ticks }
+                    },
+                });
+            }
         }
 
     }
